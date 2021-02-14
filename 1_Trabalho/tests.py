@@ -1,4 +1,5 @@
 import math
+import matplotlib.pyplot as plt
 
 # Every test function returns 1 in case of success and 0 otherwise
 def hyperbolic_test(utilization):
@@ -74,15 +75,52 @@ def rta_test(utilization, period):
 
     return 1
 
-
 def plotGraph(case, graphH, graphL, graphR):
-    # if case == 0:
-        # title("Light Light Bro")
-    return
+    title = "Title"
+    filename = ""
+    if case == 0:
+        title = "Light Utilization / Light Period"
+        filename = "plot0.png"
+    elif case == 1:
+        title = "Light Utilization / Moderate Period"
+        filename = "plot1.png"
+    elif case == 2:
+        title = "Light Utilization / Long Period"
+        filename = "plot2.png"
+    elif case == 3:
+        title = "Middle Utilization / Light Period"
+        filename = "plot3.png"
+    elif case == 4:
+        title = "Middle Utilization / Moderate Period"
+        filename = "plot4.png"
+    elif case == 5:
+        title = "Middle Utilization / Long Period"
+        filename = "plot5.png"
+    elif case == 6:
+        title = "Heavy Utilization / Light Period"
+        filename = "plot6.png"
+    elif case == 7:
+        title = "Heavy Utilization / Moderate Period"
+        filename = "plot7.png"
+    elif case == 8:
+        title = "Heavy Utilization / Long Period"
+        filename = "plot8.png"
+
+
+    x = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+    fig = plt.figure()
+    plt.plot(x, graphH)
+    plt.plot(x, graphL)
+    plt.plot(x, graphR)
+
+    plt.title(title)
+    plt.xlabel("Total Utilization")
+    plt.ylabel("Schedulability [%]")
+    plt.savefig(filename)
 
 def generateTaskSet(max_utilization, case):
     # if case == 0: light | light
-    # elif case == 1: light | mid
+    # elif case == 1: light | moderate
     # ...
 
     arrayUtilization = []
@@ -92,9 +130,12 @@ def generateTaskSet(max_utilization, case):
 
 def main():
 
-    graphH = [] # Stores values of current graphic for Hyperbolic test
-    graphL = [] # Stores values of current graphic for Liu&Layland test
-    graphR = [] # Stores values of current graphic for RTA test
+    plt.ion() # Sets plotting functions as non-blocking
+
+    # REMOVE DEFAULT VALUES (use "graphH = []") ---------------------------------
+    graphH = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] # Stores values of current graphic for Liu&Layland test
+    graphL = [100, 99, 98, 97, 96, 95, 94, 93, 92, 91] # Stores values of current graphic for Hyperbolic test
+    graphR = [50, 50, 50, 50, 50, 50, 50, 50, 50, 50] # Stores values of current graphic for RTA test
 
     countH = 0 # Counts how many task sets could be scheduled by Hyperbolic test
     countL = 0 # Counts how many task sets could be scheduled by Liu&Layland test
@@ -113,15 +154,21 @@ def main():
                 countL += liu_lay_test(arrayUtilization, arrayPeriod)
                 countR += rta_test(arrayUtilization, arrayPeriod)
 
-            graphH.append(countH)
-            graphL.append(countL)
-            graphR.append(countR)
+            # UNCOMMENT ----------------------
+            # graphH.append(countH)
+            # graphL.append(countL)
+            # graphR.append(countR)
 
             countH = countL = countR = 0
             max_util += 0.1
-
+        
         plotGraph(case, graphH, graphL, graphR)
+
+    # Blocks script while plots are open
+    plt.ioff()
+    plt.show()
     
 
 if __name__ == "__main__":
     main()
+    print("Plots were saved in current folder")

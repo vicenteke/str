@@ -1,2 +1,5 @@
 To run, use
 python3 tests.py
+
+If you get an error as "ModuleNotFoundError: No module named 'matplotlib'", you can install matplotlib for python 3 using
+sudo apt-get install python3-matplotlib
