@@ -1,5 +1,7 @@
 import math
 import matplotlib.pyplot as plt
+from random import seed
+from random import random
 
 # Every test function returns 1 in case of success and 0 otherwise
 def hyperbolic_test(utilization):
@@ -119,12 +121,71 @@ def plotGraph(case, graphH, graphL, graphR):
     plt.savefig(filename)
 
 def generateTaskSet(max_utilization, case):
-    # if case == 0: light | light
-    # elif case == 1: light | moderate
-    # ...
+    min_utilization_case = 0.0
+    max_utilization_case = 0.0
+    min_period_case = 0.0
+    max_period_case = 0.0
+    
+    #Set the parameters to the given case
+    if case == 0:
+        min_utilization_case = 0.0001
+        max_utilization_case = 0.01
+        min_period_case = 3E-3
+        max_period_case = 33E-3
+    elif case == 1:
+        min_utilization_case = 0.0001
+        max_utilization_case = 0.01
+        min_period_case = 10E-3
+        max_period_case = 100E-3
+    elif case == 2:
+        min_utilization_case = 0.0001
+        max_utilization_case = 0.01
+        min_period_case = 50E-3
+        max_period_case = 250E-3
+    elif case == 3:
+        min_utilization_case = 0.001
+        max_utilization_case = 0.09
+        min_period_case = 3E-3
+        max_period_case = 33E-3
+    elif case == 4:
+        min_utilization_case = 0.001
+        max_utilization_case = 0.09
+        min_period_case = 10E-3
+        max_period_case = 100E-3
+    elif case == 5:
+        min_utilization_case = 0.001
+        max_utilization_case = 0.09
+        min_period_case = 50E-3
+        max_period_case = 250E-3
+    elif case == 6:
+        min_utilization_case = 0.09
+        max_utilization_case = 0.1
+        min_period_case = 3E-3
+        max_period_case = 33E-3
+    elif case == 7:
+        min_utilization_case = 0.09
+        max_utilization_case = 0.1
+        min_period_case = 10E-3
+        max_period_case = 100E-3
+    elif case == 8:
+        min_utilization_case = 0.09
+        max_utilization_case = 0.1
+        min_period_case = 50E-3
+        max_period_case = 250E-3
 
     arrayUtilization = []
     arrayPeriod = []
+    x
+    current_utilization = 0.0
+    while current_utilization < max_utilization:
+        arrayPeriod.append(random.uniform(min_period_case,max_period_case))
+        if(max_utilization - current_utilization < max_utilization_case and not(max_utilization - current_utilization > min_utilization_case)):
+            arrayUtilization.append(max_utilization - current_utilization)
+            current_utilization = max_utilization
+        else:
+            holder = random.uniform(min_utilization_case, max_utilization_case)
+            current_utilization += holder
+            arrayUtilization.append(holder)
 
     return arrayUtilization, arrayPeriod
 
