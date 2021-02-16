@@ -1,5 +1,6 @@
 import math
 import matplotlib.pyplot as plt
+import random
 
 # Every test function returns 1 in case of success and 0 otherwise
 def hyperbolic_test(utilization):
@@ -118,14 +119,36 @@ def plotGraph(case, graphH, graphL, graphR):
     plt.ylabel("Schedulability [%]")
     plt.savefig(filename)
 
-def generateTaskSet(max_utilization, case):
-    # if case == 0: light | light
-    # elif case == 1: light | moderate
-    # ...
+def generateTaskSet(max_utilization):
+    max_utilization = 0.5
+    period_min = [3E-3, 10E-3, 50E-3]
+    period_max = [33E-3, 100E-3, 250E-3]
+    utilization_min = [0.0001, 0.001, 0.09]
+    utilization_max = [0.01, 0.09, 0.1]
 
     arrayUtilization = []
     arrayPeriod = []
-
+    current_utilization = 0.0
+    
+    while (current_utilization < max_utilization):
+        #Select one of the cases for each parameter
+        select_period = random.randint(0,2)
+        select_utilization = random.randint(0,2)
+        
+        #As the period does not have any limitations, it can be added without any test
+        arrayPeriod.append(random.uniform(period_min[select_period], period_max[select_period]))
+        
+        #Tests if the max utilization can be reached in this task
+        #Also tests if the difference between max and current utilization cannot be reached in next iteration, and, if positive, add the residual usage in the current task
+        #Also check if the utilization case cannot fit the gap
+        if ((max_utilization - current_utilization < utilization_max[select_utilization] and max_utilization - current_utilization > utilization_min[select_utilization]) or max_utilization - current_utilization - utilization_min[select_utilization] < utilization_min[0] or max_utilization - current_utilization < utilization_min[select_utilization]):
+            arrayUtilization.append(max_utilization - current_utilization)
+            current_utilization = max_utilization
+        else:
+            r_u = random.uniform(utilization_min[select_utilization],utilization_max[select_utilization])
+            current_utilization += r_u
+            arrayUtilization.append(r_u)
+            
     return arrayUtilization, arrayPeriod
 
 def main():
