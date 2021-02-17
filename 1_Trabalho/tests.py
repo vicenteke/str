@@ -76,48 +76,63 @@ def rta_test(utilization, period):
 
     return 1
 
-def plotGraph(case, graphH, graphL, graphR):
-    title = "Title"
-    filename = ""
-    if case == 0:
-        title = "Light Utilization / Light Period"
-        filename = "plot0.png"
-    elif case == 1:
-        title = "Light Utilization / Moderate Period"
-        filename = "plot1.png"
-    elif case == 2:
-        title = "Light Utilization / Long Period"
-        filename = "plot2.png"
-    elif case == 3:
-        title = "Middle Utilization / Light Period"
-        filename = "plot3.png"
-    elif case == 4:
-        title = "Middle Utilization / Moderate Period"
-        filename = "plot4.png"
-    elif case == 5:
-        title = "Middle Utilization / Long Period"
-        filename = "plot5.png"
-    elif case == 6:
-        title = "Heavy Utilization / Light Period"
-        filename = "plot6.png"
-    elif case == 7:
-        title = "Heavy Utilization / Moderate Period"
-        filename = "plot7.png"
-    elif case == 8:
-        title = "Heavy Utilization / Long Period"
-        filename = "plot8.png"
+def plotGraph(graphH, graphL, graphR):
+    filename = "plotMax.png"
+    # filename = ""
+    # title = "Title"
+    # if case == 0:
+    #     title = "Light Utilization / Light Period"
+    #     filename = "plot0.png"
+    # elif case == 1:
+    #     title = "Light Utilization / Moderate Period"
+    #     filename = "plot1.png"
+    # elif case == 2:
+    #     title = "Light Utilization / Long Period"
+    #     filename = "plot2.png"
+    # elif case == 3:
+    #     title = "Middle Utilization / Light Period"
+    #     filename = "plot3.png"
+    # elif case == 4:
+    #     title = "Middle Utilization / Moderate Period"
+    #     filename = "plot4.png"
+    # elif case == 5:
+    #     title = "Middle Utilization / Long Period"
+    #     filename = "plot5.png"
+    # elif case == 6:
+    #     title = "Heavy Utilization / Light Period"
+    #     filename = "plot6.png"
+    # elif case == 7:
+    #     title = "Heavy Utilization / Moderate Period"
+    #     filename = "plot7.png"
+    # elif case == 8:
+    #     title = "Heavy Utilization / Long Period"
+    #     filename = "plot8.png"
 
 
     x = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
     fig = plt.figure()
+    plt.ylim(-4, 104)
     plt.plot(x, graphH)
     plt.plot(x, graphL)
     plt.plot(x, graphR)
 
-    plt.title(title)
+    # plt.title(title)
     plt.xlabel("Total Utilization")
     plt.ylabel("Schedulability [%]")
     plt.savefig(filename)
+
+def random_uniform(min, max):
+    # Light and moderate period
+    if max % min == 0:
+        return ((int(random.random() * 1000) % int(max/min)) + 1) * min
+        # e.g. min = .0001 ; max = .01
+        # max / min = 100
+        # Generates number between [1, 100]
+        # Multiplies by .0001
+
+    # Heavy period
+    else:
+        return (int((random.random() * 10) + 1) * 0.001) + min
 
 def generateTaskSet(max_utilization):
     max_utilization = 0.5
@@ -136,7 +151,7 @@ def generateTaskSet(max_utilization):
         select_utilization = random.randint(0,2)
         
         #As the period does not have any limitations, it can be added without any test
-        arrayPeriod.append(random.uniform(period_min[select_period], period_max[select_period]))
+        arrayPeriod.append(random_uniform(period_min[select_period], period_max[select_period]))
         
         #Tests if the max utilization can be reached in this task
         #Also tests if the difference between max and current utilization cannot be reached in next iteration, and, if positive, add the residual usage in the current task
@@ -145,7 +160,7 @@ def generateTaskSet(max_utilization):
             arrayUtilization.append(max_utilization - current_utilization)
             current_utilization = max_utilization
         else:
-            r_u = random.uniform(utilization_min[select_utilization],utilization_max[select_utilization])
+            r_u = random_uniform(utilization_min[select_utilization],utilization_max[select_utilization])
             current_utilization += r_u
             arrayUtilization.append(r_u)
             
@@ -155,10 +170,9 @@ def main():
 
     plt.ion() # Sets plotting functions as non-blocking
 
-    # REMOVE DEFAULT VALUES (use "graphH = []") ---------------------------------
-    graphH = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] # Stores values of current graphic for Liu&Layland test
-    graphL = [100, 99, 98, 97, 96, 95, 94, 93, 92, 91] # Stores values of current graphic for Hyperbolic test
-    graphR = [50, 50, 50, 50, 50, 50, 50, 50, 50, 50] # Stores values of current graphic for RTA test
+    graphH = [] # Stores values of current graphic for Liu&Layland test
+    graphL = [] # Stores values of current graphic for Hyperbolic test
+    graphR = [] # Stores values of current graphic for RTA test
 
     countH = 0 # Counts how many task sets could be scheduled by Hyperbolic test
     countL = 0 # Counts how many task sets could be scheduled by Liu&Layland test
@@ -166,26 +180,28 @@ def main():
 
     max_util = 0.1
 
-    # For each case
-    for case in range(0, 9):
-        # For max_util 0.1, 0.2 ... 1
-        for y in range(1,10):
-            # Generate 100 different task sets
-            for z in range(1,101):
-                arrayUtilization, arrayPeriod = generateTaskSet(max_util, case)
-                countH += hyperbolic_test(arrayUtilization)
-                countL += liu_lay_test(arrayUtilization, arrayPeriod)
-                countR += rta_test(arrayUtilization, arrayPeriod)
+    # For max_util 0.1, 0.2 ... 1
+    for y in range(1,11):
+        # Generate 100 different task sets
+        for z in range(1,101):
+            arrayUtilization, arrayPeriod = generateTaskSet(max_util)
+            countH += hyperbolic_test(arrayUtilization)
+            countL += liu_lay_test(arrayUtilization, arrayPeriod)
+            countR += rta_test(arrayUtilization, arrayPeriod)
 
-            # UNCOMMENT ----------------------
-            # graphH.append(countH)
-            # graphL.append(countL)
-            # graphR.append(countR)
+        # UNCOMMENT ----------------------
+        graphH.append(countH)
+        graphL.append(countL)
+        graphR.append(countR)
 
-            countH = countL = countR = 0
-            max_util += 0.1
-        
-        plotGraph(case, graphH, graphL, graphR)
+        countH = countL = countR = 0
+        max_util += 0.1
+    
+    plotGraph(graphH, graphL, graphR)
+    max_util = 0.1
+    graphH = []
+    graphL = []
+    graphR = []
 
     # Blocks script while plots are open
     plt.ioff()
