@@ -119,6 +119,7 @@ def plotGraph(case, graphH, graphL, graphR):
     plt.title(title)
     plt.xlabel("Total Utilization")
     plt.ylabel("Schedulability [%]")
+    plt.ylim(-4, 104)
     plt.savefig(filename)
 
 def random_uniform(min, max):
