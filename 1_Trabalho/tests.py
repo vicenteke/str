@@ -111,10 +111,11 @@ def plotGraph(case, graphH, graphL, graphR):
 
     x = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
     fig = plt.figure()
-    plt.plot(x, graphH, color = "#FF7F50")
-    plt.plot(x, graphL, color = "#DC143C")
-    plt.plot(x, graphR, color = "#008B8B")
+    plt.plot(x, graphH, '-.', color = "#FF7F50", label = "Hyperbolic")
+    plt.plot(x, graphL, ':', color = "#DC143C", label = "Liu&Layland")
+    plt.plot(x, graphR, '--', color = "#008B8B", label = "RTA")
 
+    plt.legend(loc="lower left")
     plt.title(title)
     plt.xlabel("Total Utilization")
     plt.ylabel("Schedulability [%]")
@@ -123,7 +124,7 @@ def plotGraph(case, graphH, graphL, graphR):
 def random_uniform(min, max):
     # Light and moderate period
     if max % min == 0:
-        return ((int(random() * 1000) % (max/min)) + 1) * min
+        return ((int(random() * 1000) % int(max/min)) + 1) * min
         # e.g. min = .0001 ; max = .01
         # max / min = 100
         # Generates number between [1, 100]
@@ -188,17 +189,42 @@ def generateTaskSet(max_utilization, case):
 
     arrayUtilization = []
     arrayPeriod = []
-    # x
-    current_utilization = 0.0
-    while current_utilization < max_utilization:
-        arrayPeriod.append(random_uniform(min_period_case,max_period_case))
-        if(max_utilization - current_utilization < max_utilization_case and not(max_utilization - current_utilization > min_utilization_case)):
-            arrayUtilization.append(max_utilization - current_utilization)
-            current_utilization = max_utilization
+
+    if case >= 6:
+        # Heavy utilization
+        if max_utilization < 0.9:
+            # Only possible combination is (10 * max_utilization) tasks of max_utilization_case
+            for n in range(0, int(10 * max_utilization)):
+                arrayUtilization.append(max_utilization_case)
+                arrayPeriod.append(random_uniform(min_period_case, max_period_case))
+
         else:
-            holder = random_uniform(min_utilization_case, max_utilization_case)
-            current_utilization += holder
-            arrayUtilization.append(holder)
+            # Can only be all max_utilization_case or all min_utilization_case + 1 task
+            usesMinUtilization = int(random() * 2) % 2
+            for n in range(0, int(10 * max_utilization) + usesMinUtilization):
+                arrayPeriod.append(random_uniform(min_period_case,max_period_case))
+                if usesMinUtilization == 1:
+                    if n == 10:
+                        # For 1.0 utilization, last task has to have max_utilization_case
+                        arrayUtilization.append(max_utilization_case)
+                    else:
+                        arrayUtilization.append(min_utilization_case)
+                else:
+                    arrayUtilization.append(max_utilization_case)
+
+        return arrayUtilization, arrayPeriod
+
+    else:
+        current_utilization = 0.0
+        while current_utilization < max_utilization:
+            arrayPeriod.append(random_uniform(min_period_case,max_period_case))
+            if(max_utilization - current_utilization < max_utilization_case and not(max_utilization - current_utilization > min_utilization_case)):
+                arrayUtilization.append(max_utilization - current_utilization)
+                current_utilization = max_utilization
+            else:
+                holder = random_uniform(min_utilization_case, max_utilization_case)
+                current_utilization += holder
+                arrayUtilization.append(holder)
 
     return arrayUtilization, arrayPeriod
 
@@ -233,8 +259,10 @@ def main():
 
             countH = countL = countR = 0
             max_util += 0.1
+            max_util = round(10 * max_util) / 10
         
         plotGraph(case, graphH, graphL, graphR)
+        max_util = 0.1
         graphH = []
         graphL = []
         graphR = []
