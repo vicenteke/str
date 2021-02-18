@@ -16,13 +16,16 @@ def hyperbolic_test(utilization):
 def liu_lay_test(utilization, period):
     utilization_sum = 0
     harmonic = True
+    w0 = period[0]
     n = 0
     test = 0
     for u in utilization:
         utilization_sum += u
         if n > 0 and harmonic:
-            if period[n] % period[n-1] != 0 and period[n-1] % period[n] != 0:
+            if period[n] % w0 != 0 and w0 % period[n] != 0:
                 harmonic = False
+            elif period[n] < w0:
+                    w0 = period[n]
         n += 1
 
     if harmonic:
