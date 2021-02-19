@@ -1,5 +1,6 @@
 import math
 import matplotlib.pyplot as plt
+from random import random, randint
 
 # Every test function returns 1 in case of success and 0 otherwise
 def hyperbolic_test(utilization):
@@ -14,14 +15,17 @@ def hyperbolic_test(utilization):
 def liu_lay_test(utilization, period):
     utilization_sum = 0
     harmonic = True
+    w0 = period[0]
     n = 0
     test = 0
     for u in utilization:
         utilization_sum += u
-        n += 1
         if n > 0 and harmonic:
-            if period[n] % period[n+1] != 0 and period[n+1] % period[n] != 0:
+            if period[n] % w0 != 0 and w0 % period[n] != 0:
                 harmonic = False
+            elif period[n] < w0:
+                    w0 = period[n]
+        n += 1
 
     if harmonic:
         test = 1
@@ -109,33 +113,133 @@ def plotGraph(case, graphH, graphL, graphR):
 
     x = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
     fig = plt.figure()
-    plt.plot(x, graphH)
-    plt.plot(x, graphL)
-    plt.plot(x, graphR)
+    plt.plot(x, graphH, '-.', color = "#FF7F50", label = "Hyperbolic")
+    plt.plot(x, graphL, ':', color = "#DC143C", label = "Liu&Layland")
+    plt.plot(x, graphR, '--', color = "#008B8B", label = "RTA")
 
+    plt.legend(loc="lower left")
     plt.title(title)
     plt.xlabel("Total Utilization")
     plt.ylabel("Schedulability [%]")
+    plt.ylim(-4, 104)
     plt.savefig(filename)
 
+
+def random_uniform(min, max):
+    # Light and moderate period
+    if max % min == 0:
+        return ((int(random() * 1000) % int(max/min)) + 1) * min
+        # e.g. min = .0001 ; max = .01
+        # max / min = 100
+        # Generates number between [1, 100]
+        # Multiplies by .0001
+
+    # Heavy period
+    else:
+        return (int((random() * 10) + 1) * 0.001) + min
+
 def generateTaskSet(max_utilization, case):
-    # if case == 0: light | light
-    # elif case == 1: light | moderate
-    # ...
+    min_utilization_case = 0.0
+    max_utilization_case = 0.0
+    min_period_case = 0.0
+    max_period_case = 0.0
+    
+    #Set the parameters to the given case
+    if case == 0:
+        min_utilization_case = 0.0001
+        max_utilization_case = 0.01
+        min_period_case = 3E-3
+        max_period_case = 33E-3
+    elif case == 1:
+        min_utilization_case = 0.0001
+        max_utilization_case = 0.01
+        min_period_case = 10E-3
+        max_period_case = 100E-3
+    elif case == 2:
+        min_utilization_case = 0.0001
+        max_utilization_case = 0.01
+        min_period_case = 50E-3
+        max_period_case = 250E-3
+    elif case == 3:
+        min_utilization_case = 0.001
+        max_utilization_case = 0.09
+        min_period_case = 3E-3
+        max_period_case = 33E-3
+    elif case == 4:
+        min_utilization_case = 0.001
+        max_utilization_case = 0.09
+        min_period_case = 10E-3
+        max_period_case = 100E-3
+    elif case == 5:
+        min_utilization_case = 0.001
+        max_utilization_case = 0.09
+        min_period_case = 50E-3
+        max_period_case = 250E-3
+    elif case == 6:
+        min_utilization_case = 0.09
+        max_utilization_case = 0.1
+        min_period_case = 3E-3
+        max_period_case = 33E-3
+    elif case == 7:
+        min_utilization_case = 0.09
+        max_utilization_case = 0.1
+        min_period_case = 10E-3
+        max_period_case = 100E-3
+    elif case == 8:
+        min_utilization_case = 0.09
+        max_utilization_case = 0.1
+        min_period_case = 50E-3
+        max_period_case = 250E-3
 
     arrayUtilization = []
     arrayPeriod = []
 
+    if case >= 6:
+        # Heavy utilization
+        if max_utilization < 0.9:
+            # Only possible combination is (10 * max_utilization) tasks of max_utilization_case
+            for n in range(0, int(10 * max_utilization)):
+                arrayUtilization.append(max_utilization_case)
+                arrayPeriod.append(random_uniform(min_period_case, max_period_case))
+
+        else:
+            # Can only be all max_utilization_case or all min_utilization_case + 1 task
+            usesMinUtilization = int(random() * 2) % 2
+            for n in range(0, int(10 * max_utilization) + usesMinUtilization):
+                arrayPeriod.append(random_uniform(min_period_case,max_period_case))
+                if usesMinUtilization == 1:
+                    if n == 10:
+                        # For 1.0 utilization, last task has to have max_utilization_case
+                        arrayUtilization.append(max_utilization_case)
+                    else:
+                        arrayUtilization.append(min_utilization_case)
+                else:
+                    arrayUtilization.append(max_utilization_case)
+
+        return arrayUtilization, arrayPeriod
+
+    else:
+        current_utilization = 0.0
+        while current_utilization < max_utilization:
+            arrayPeriod.append(random_uniform(min_period_case,max_period_case))
+            if(max_utilization - current_utilization < max_utilization_case and not(max_utilization - current_utilization > min_utilization_case)):
+                arrayUtilization.append(max_utilization - current_utilization)
+                current_utilization = max_utilization
+            else:
+                holder = random_uniform(min_utilization_case, max_utilization_case)
+                current_utilization += holder
+                arrayUtilization.append(holder)
+
     return arrayUtilization, arrayPeriod
+
 
 def main():
 
     plt.ion() # Sets plotting functions as non-blocking
 
-    # REMOVE DEFAULT VALUES (use "graphH = []") ---------------------------------
-    graphH = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] # Stores values of current graphic for Liu&Layland test
-    graphL = [100, 99, 98, 97, 96, 95, 94, 93, 92, 91] # Stores values of current graphic for Hyperbolic test
-    graphR = [50, 50, 50, 50, 50, 50, 50, 50, 50, 50] # Stores values of current graphic for RTA test
+    graphH = [] # Stores values of current graphic for Liu&Layland test
+    graphL = [] # Stores values of current graphic for Hyperbolic test
+    graphR = [] # Stores values of current graphic for RTA test
 
     countH = 0 # Counts how many task sets could be scheduled by Hyperbolic test
     countL = 0 # Counts how many task sets could be scheduled by Liu&Layland test
@@ -154,15 +258,19 @@ def main():
                 countL += liu_lay_test(arrayUtilization, arrayPeriod)
                 countR += rta_test(arrayUtilization, arrayPeriod)
 
-            # UNCOMMENT ----------------------
-            # graphH.append(countH)
-            # graphL.append(countL)
-            # graphR.append(countR)
+            graphH.append(countH)
+            graphL.append(countL)
+            graphR.append(countR)
 
             countH = countL = countR = 0
             max_util += 0.1
+            max_util = round(10 * max_util) / 10
         
         plotGraph(case, graphH, graphL, graphR)
+        graphH = []
+        graphL = []
+        graphR = []
+        max_util = 0.1
 
     # Blocks script while plots are open
     plt.ioff()
