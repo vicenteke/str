@@ -250,7 +250,7 @@ def main():
     # For each case
     for case in range(0, 9):
         # For max_util 0.1, 0.2 ... 1
-        for y in range(1,11):
+        for y in range(1,10):
             # Generate 100 different task sets
             for z in range(1,101):
                 arrayUtilization, arrayPeriod = generateTaskSet(max_util, case)
