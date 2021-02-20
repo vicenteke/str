@@ -1,6 +1,6 @@
 import math
 import matplotlib.pyplot as plt
-from random import random, randint
+import random
 
 # Every test function returns 1 in case of success and 0 otherwise
 def hyperbolic_test(utilization):
@@ -23,14 +23,15 @@ def liu_lay_test(utilization, period):
         if n > 0 and harmonic:
             if period[n] % w0 != 0 and w0 % period[n] != 0:
                 harmonic = False
-            elif period[n] < w0:
-                    w0 = period[n]
+            elif period[n] > w0:
+                w0 = period[n]
         n += 1
 
     if harmonic:
         test = 1
+        # print("Harmonic!", utilization_sum, period)
     else:
-        test = n * (pow(2, (1/n)) - 1)
+        test = n * (pow(2, float(1/n)) - 1)
     if test >= utilization_sum:
         return 1
     else:
@@ -62,7 +63,8 @@ def rta_test(utilization, period):
         ri.append(result)
 
         # Calculates ri[k]
-        while (abs(ri[k] - ri[k-1]) > 0.1):
+        while (abs(ri[k] - ri[k - 1]) > 0.0):
+        # while (abs(ri[k] - ri[k - 1]) > 0.1):
             k += 1
             result = period[i] * utilization[i]
             j = 0
@@ -73,6 +75,7 @@ def rta_test(utilization, period):
             ri.append(result)
 
         if ri[k] > p and i > 0: # Assuming Di = Ti
+        # if ri[k] > p: # Assuming Di = Ti
             return 0
 
         i += 1
@@ -113,11 +116,11 @@ def plotGraph(case, graphH, graphL, graphR):
 
     x = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
     fig = plt.figure()
-    plt.plot(x, graphH, '-.', color = "#FF7F50", label = "Hyperbolic")
-    plt.plot(x, graphL, ':', color = "#DC143C", label = "Liu&Layland")
-    plt.plot(x, graphR, '--', color = "#008B8B", label = "RTA")
+    plt.plot(x, graphL, color = "#DC143C", label = "Liu&Layland")
+    plt.plot(x, graphH, ':', color = "#008B8B", label = "Hyperbolic")
+    plt.plot(x, graphR, color = "#FF7F50", label = "RTA")
 
-    plt.legend(loc="lower left")
+    plt.legend(loc = "lower left")
     plt.title(title)
     plt.xlabel("Total Utilization")
     plt.ylabel("Schedulability [%]")
@@ -128,7 +131,7 @@ def plotGraph(case, graphH, graphL, graphR):
 def random_uniform(min, max):
     # Light and moderate period
     if max % min == 0:
-        return ((int(random() * 1000) % int(max/min)) + 1) * min
+        return ((int(random.random() * 1000) % int(max/min)) + 1) * min
         # e.g. min = .0001 ; max = .01
         # max / min = 100
         # Generates number between [1, 100]
@@ -136,7 +139,16 @@ def random_uniform(min, max):
 
     # Heavy period
     else:
-        return (int((random() * 10) + 1) * 0.001) + min
+        return (int((random.random() * 10) + 1) * 0.001) + min
+
+# Generates a random number (uniform) within min and max, with 'resolution' decimals
+def random_uniform_res(min, max, resolution):
+    res = round(random.uniform(min, max), resolution)
+    while (res == 0):
+        print("Error: value should not be zero")
+        res = round(random.uniform(min, max), resolution)
+
+    return res
 
 def generateTaskSet(max_utilization, case):
     min_utilization_case = 0.0
@@ -200,13 +212,15 @@ def generateTaskSet(max_utilization, case):
             # Only possible combination is (10 * max_utilization) tasks of max_utilization_case
             for n in range(0, int(10 * max_utilization)):
                 arrayUtilization.append(max_utilization_case)
-                arrayPeriod.append(random_uniform(min_period_case, max_period_case))
+                # arrayPeriod.append(random_uniform(min_period_case, max_period_case))
+                arrayPeriod.append(random_uniform_res(min_period_case, max_period_case, 3))
 
         else:
             # Can only be all max_utilization_case or all min_utilization_case + 1 task
-            usesMinUtilization = int(random() * 2) % 2
+            usesMinUtilization = int(random.random() * 2) % 2
             for n in range(0, int(10 * max_utilization) + usesMinUtilization):
-                arrayPeriod.append(random_uniform(min_period_case,max_period_case))
+                # arrayPeriod.append(random_uniform(min_period_case,max_period_case))
+                arrayPeriod.append(random_uniform_res(min_period_case, max_period_case, 3))
                 if usesMinUtilization == 1:
                     if n == 10:
                         # For 1.0 utilization, last task has to have max_utilization_case
@@ -221,12 +235,20 @@ def generateTaskSet(max_utilization, case):
     else:
         current_utilization = 0.0
         while current_utilization < max_utilization:
-            arrayPeriod.append(random_uniform(min_period_case,max_period_case))
+            # arrayPeriod.append(random_uniform(min_period_case, max_period_case))
+            arrayPeriod.append(random_uniform_res(min_period_case, max_period_case, 3))
             if(max_utilization - current_utilization < max_utilization_case and not(max_utilization - current_utilization > min_utilization_case)):
                 arrayUtilization.append(max_utilization - current_utilization)
                 current_utilization = max_utilization
             else:
-                holder = random_uniform(min_utilization_case, max_utilization_case)
+                # holder = random_uniform(min_utilization_case, max_utilization_case)
+                if case < 3:
+                    holder = random_uniform_res(min_utilization_case, max_utilization_case, 4)
+                elif case < 6:
+                    holder = random_uniform_res(min_utilization_case, max_utilization_case, 3)
+                else:
+                    holder = random_uniform_res(min_utilization_case, max_utilization_case, 2)
+
                 current_utilization += holder
                 arrayUtilization.append(holder)
 
