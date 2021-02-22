@@ -38,8 +38,12 @@ def liu_lay_test(utilization, period):
         return 0
 
 def rta_test(utilization, period):
-    i = 0
-    for p in period:
+    utilization, period = sort_by_priority(utilization, period)
+    i = len(period) - 1
+    for p in reversed(period):
+        if i < 0:
+            return 1
+
         ri = []
         result = 0
         j = 0
@@ -47,7 +51,7 @@ def rta_test(utilization, period):
 
         # Calculates ri[0]
         result = period[i] * utilization[i]
-        while (j < i):
+        while (period[j] < p and j < i):
             result += period[j] * utilization[j]
             j += 1
 
@@ -56,29 +60,29 @@ def rta_test(utilization, period):
         # Calculates ri[1]
         result = period[i] * utilization[i]
         j = 0
-        while (j < i):
+        while (period[j] < p and j < i):
             result += math.ceil(ri[k - 1] / period[j]) * period[j] * utilization[j]
             j += 1
 
         ri.append(result)
 
         # Calculates ri[k]
-        while (abs(ri[k] - ri[k - 1]) > 0.0):
+        while (abs(ri[k] - ri[k - 1]) > 0.001):
         # while (abs(ri[k] - ri[k - 1]) > 0.1):
             k += 1
-            result = period[i] * utilization[i]
             j = 0
-            while (j < i):
+            result = period[i] * utilization[i]
+            while (period[j] < p and j < i):
                 result += math.ceil(ri[k - 1] / period[j]) * period[j] * utilization[j]
                 j += 1
 
+            # As Ri[k + 1] >= Ri[k] always
+            if result > p:
+                return 0
+
             ri.append(result)
 
-        if ri[k] > p and i > 0: # Assuming Di = Ti
-        # if ri[k] > p: # Assuming Di = Ti
-            return 0
-
-        i += 1
+        i -= 1
 
     return 1
 
@@ -117,7 +121,7 @@ def plotGraph(case, graphH, graphL, graphR):
     x = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
     fig = plt.figure()
     plt.plot(x, graphL, color = "#DC143C", label = "Liu&Layland")
-    plt.plot(x, graphH, ':', color = "#008B8B", label = "Hyperbolic")
+    plt.plot(x, graphH, ':', color = "#008B8B", label = "Hyperbolic", linewidth = 3.5)
     plt.plot(x, graphR, color = "#FF7F50", label = "RTA")
 
     plt.legend(loc = "lower left")
@@ -126,7 +130,6 @@ def plotGraph(case, graphH, graphL, graphR):
     plt.ylabel("Schedulability [%]")
     plt.ylim(-4, 104)
     plt.savefig(filename)
-
 
 def random_uniform(min, max):
     # Light and moderate period
@@ -149,6 +152,12 @@ def random_uniform_res(min, max, resolution):
         res = round(random.uniform(min, max), resolution)
 
     return res
+
+# Sorts both parameters based on priority (shorter period, higher priority)
+def sort_by_priority(utilization, period):
+    arrayUtilization = [u for p, u in sorted(zip(period, utilization))]
+    period.sort()
+    return arrayUtilization, period
 
 def generateTaskSet(max_utilization, case):
     min_utilization_case = 0.0
