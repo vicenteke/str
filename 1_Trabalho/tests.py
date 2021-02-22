@@ -21,15 +21,12 @@ def liu_lay_test(utilization, period):
     for u in utilization:
         utilization_sum += u
         if n > 0 and harmonic:
-            if period[n] % w0 != 0 and w0 % period[n] != 0:
+            if period[n] % w0 != 0:
                 harmonic = False
-            elif period[n] > w0:
-                w0 = period[n]
         n += 1
 
     if harmonic:
         test = 1
-        # print("Harmonic!", utilization_sum, period)
     else:
         test = n * (pow(2, float(1/n)) - 1)
     if test >= utilization_sum:
@@ -38,7 +35,7 @@ def liu_lay_test(utilization, period):
         return 0
 
 def rta_test(utilization, period):
-    utilization, period = sort_by_priority(utilization, period)
+    # utilization, period = sort_by_priority(utilization, period)
     i = len(period) - 1
     for p in reversed(period):
         if i < 0:
@@ -159,6 +156,16 @@ def sort_by_priority(utilization, period):
     period.sort()
     return arrayUtilization, period
 
+# Writes 'utilization' and 'period' arrays to 'file'
+def write_into_file(file, utilization, period):
+    list = ['{:.4f}'.format(x) for x in utilization]
+    str = "[" + ', '.join(list) + "]\n"
+    file.write(str)
+    list = ['{:.3f}'.format(x) for x in period]
+    str = "[" + ', '.join(list) + "]\n"
+    file.write(str)
+    file.write('\n')
+
 def generateTaskSet(max_utilization, case):
     min_utilization_case = 0.0
     max_utilization_case = 0.0
@@ -266,6 +273,8 @@ def generateTaskSet(max_utilization, case):
 
 def main():
 
+    f = open("data.txt",'r+') # File that stores data used for calculations
+    f.truncate(0)
     plt.ion() # Sets plotting functions as non-blocking
 
     graphH = [] # Stores values of current graphic for Liu&Layland test
@@ -285,6 +294,8 @@ def main():
             # Generate 100 different task sets
             for z in range(1,101):
                 arrayUtilization, arrayPeriod = generateTaskSet(max_util, case)
+                arrayUtilization, arrayPeriod = sort_by_priority(arrayUtilization, arrayPeriod)
+                write_into_file(f, arrayUtilization, arrayPeriod)
                 countH += hyperbolic_test(arrayUtilization)
                 countL += liu_lay_test(arrayUtilization, arrayPeriod)
                 countR += rta_test(arrayUtilization, arrayPeriod)
@@ -303,6 +314,7 @@ def main():
         graphR = []
         max_util = 0.1
 
+    f.close()
     # Blocks script while plots are open
     plt.ioff()
     plt.show()
