@@ -35,7 +35,6 @@ def liu_lay_test(utilization, period):
         return 0
 
 def rta_test(utilization, period):
-    # utilization, period = sort_by_priority(utilization, period)
     i = len(period) - 1
     for p in reversed(period):
         if i < 0:
