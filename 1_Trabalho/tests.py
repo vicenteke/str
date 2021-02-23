@@ -65,7 +65,6 @@ def rta_test(utilization, period):
 
         # Calculates ri[k]
         while (abs(ri[k] - ri[k - 1]) > 0.001):
-        # while (abs(ri[k] - ri[k - 1]) > 0.1):
             k += 1
             j = 0
             result = period[i] * utilization[i]
@@ -80,7 +79,6 @@ def rta_test(utilization, period):
             ri.append(result)
 
         i -= 1
-
     return 1
 
 def plotGraph(case, graphH, graphL, graphR):
@@ -128,27 +126,9 @@ def plotGraph(case, graphH, graphL, graphR):
     plt.ylim(-4, 104)
     plt.savefig(filename)
 
-def random_uniform(min, max):
-    # Light and moderate period
-    if max % min == 0:
-        return ((int(random.random() * 1000) % int(max/min)) + 1) * min
-        # e.g. min = .0001 ; max = .01
-        # max / min = 100
-        # Generates number between [1, 100]
-        # Multiplies by .0001
-
-    # Heavy period
-    else:
-        return (int((random.random() * 10) + 1) * 0.001) + min
-
 # Generates a random number (uniform) within min and max, with 'resolution' decimals
 def random_uniform_res(min, max, resolution):
-    res = round(random.uniform(min, max), resolution)
-    while (res == 0):
-        print("Error: value should not be zero")
-        res = round(random.uniform(min, max), resolution)
-
-    return res
+    return round(random.uniform(min, max), resolution)
 
 # Sorts both parameters based on priority (shorter period, higher priority)
 def sort_by_priority(utilization, period):
@@ -228,18 +208,16 @@ def generateTaskSet(max_utilization, case):
             # Only possible combination is (10 * max_utilization) tasks of max_utilization_case
             for n in range(0, int(10 * max_utilization)):
                 arrayUtilization.append(max_utilization_case)
-                # arrayPeriod.append(random_uniform(min_period_case, max_period_case))
                 arrayPeriod.append(random_uniform_res(min_period_case, max_period_case, 3))
 
         else:
             # Can only be all max_utilization_case or all min_utilization_case + 1 task
             usesMinUtilization = int(random.random() * 2) % 2
             for n in range(0, int(10 * max_utilization) + usesMinUtilization):
-                # arrayPeriod.append(random_uniform(min_period_case,max_period_case))
                 arrayPeriod.append(random_uniform_res(min_period_case, max_period_case, 3))
                 if usesMinUtilization == 1:
                     if n == 10:
-                        # For 1.0 utilization, last task has to have max_utilization_case
+                        # For 1.0 utilization, last task has to be max_utilization_case
                         arrayUtilization.append(max_utilization_case)
                     else:
                         arrayUtilization.append(min_utilization_case)
@@ -251,13 +229,11 @@ def generateTaskSet(max_utilization, case):
     else:
         current_utilization = 0.0
         while current_utilization < max_utilization:
-            # arrayPeriod.append(random_uniform(min_period_case, max_period_case))
             arrayPeriod.append(random_uniform_res(min_period_case, max_period_case, 3))
             if(max_utilization - current_utilization < max_utilization_case and not(max_utilization - current_utilization > min_utilization_case)):
                 arrayUtilization.append(max_utilization - current_utilization)
                 current_utilization = max_utilization
             else:
-                # holder = random_uniform(min_utilization_case, max_utilization_case)
                 if case < 3:
                     holder = random_uniform_res(min_utilization_case, max_utilization_case, 4)
                 elif case < 6:
@@ -274,7 +250,7 @@ def generateTaskSet(max_utilization, case):
 def main():
 
     f = open("data.txt",'r+') # File that stores data used for calculations
-    f.truncate(0)
+    f.truncate(0) # Clear file
     plt.ion() # Sets plotting functions as non-blocking
 
     graphH = [] # Stores values of current graphic for Liu&Layland test
@@ -315,6 +291,7 @@ def main():
         max_util = 0.1
 
     f.close()
+    
     # Blocks script while plots are open
     plt.ioff()
     plt.show()
@@ -322,4 +299,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    print("Plots were saved in current folder")
+    print("Plots and data were saved in current folder")
