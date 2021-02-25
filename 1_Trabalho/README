@@ -1,5 +1,7 @@
 To run, use
 python3 tests.py
 
+The script will generate the plots while executing and wait for the user to close them. Once the execution is over, data.txt will hold the data generated and plot0.png to plot8.png the plots.
+
 If you get an error as "ModuleNotFoundError: No module named 'matplotlib'", you can install matplotlib for python 3 using
 sudo apt-get install python3-matplotlib
