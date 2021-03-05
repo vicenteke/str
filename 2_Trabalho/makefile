@@ -1,17 +1,19 @@
 CC_FILES=$(wildcard *.cc)
 
 make:
-# 	taskset -c 1
 	g++ $(CC_FILES) -o s -g -lrt -Wall
-	./s 500 0 100000 SCHED_FIFO
+	sudo setcap cap_sys_nice=ep ./s
+	taskset -c 0 ./s 500 5 100000 SCHED_RR
 
-valgrind:
-	g++ -std=c++1z $(CC_FILES) -o s -v
-	valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all ./s
+fifo:
+	g++ $(CC_FILES) -o s -g -lrt -Wall
+	sudo setcap cap_sys_nice=ep ./s
+	taskset -c 0 ./s 500 5 100000 SCHED_FIFO
 
-valg:
-	g++ -std=c++1z $(CC_FILES) -o s
-	valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all ./s
+rr:
+	g++ $(CC_FILES) -o s -g -lrt -Wall
+	sudo setcap cap_sys_nice=ep ./s
+	taskset -c 0 ./s 500 1 100000 SCHED_RR
 
 clean:
 	rm -f *.o s
