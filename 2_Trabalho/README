@@ -1,0 +1,32 @@
+In order to execute the code, just run:
+
+	$ make
+
+It will probably ask you to enter your sudo password, so the program is allowed to change scheduler options.
+This command will run with the following parameters:
+
+	Period: 500
+    Priority: 5
+    Load: 100000
+    Scheduler: SCHED_RR
+    
+To run with SCHED_FIFO, just execute:
+
+	$ make fifo
+	
+And to run with a lower priority, use:
+
+	$ make rr
+	
+Of course, you can use differente settings. To do so, run 'make' once, then you can execute it with:
+
+	$ taskset -c 'core' ./s 'period in ms' 'priority' 'load' 'scheduler'
+	
+where scheduler is either 'SCHED_FIFO' or 'SCHED_RR'. An example running default parameters is:
+
+	$ taskset -c 0 ./s 500 5 100000 SCHED_RR
+
+If you don't want to restricting it to any processor:
+
+	$ ./s 500 5 100000 SCHED_RR
+
