@@ -21,17 +21,13 @@ private:
     }
 
 private:
-    // estrutura que define um tratador de sinal
     struct sigaction action;
-
-    // // estrutura de inicialização to timer
-    // struct itimerval timer;
+    struct sigevent sigev;
+    
+    timer_t timer;
+    struct itimerspec itspec;
     unsigned int _period;
     Function *_handler;
-
-    timer_t timer;
-    struct sigevent sigev;
-    struct itimerspec itspec;
 };
 
 #endif

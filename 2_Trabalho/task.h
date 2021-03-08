@@ -11,20 +11,26 @@ public:
         _load = load;
         _count = count;
 
+        _timer = new Timer(period);
+
         sigemptyset(&set);
         sigaddset(&set, SIGALRM);
+    }
+
+    ~Task() {
+        delete _timer;
     }
 
     void run() {
         int sig = 0;
         unsigned int i = 0;
         while (!sigwait(&set, &sig) && i++ < _count) {
-            dummyFunction(0);
+            dummyFunction();
         }
     }
 
 private:
-    static void dummyFunction(int a = 0) {
+    void dummyFunction() {
         for (unsigned int i = 0; i < _load * 1000; ++i);
         _timer->showTime();
     }
@@ -34,10 +40,8 @@ private:
     int _priority;
     unsigned int _count;
     sigset_t set;
-
-public:
-    static unsigned long _load;
-    static Timer * _timer;
+    unsigned long _load;
+    Timer * _timer;
 };
 
 #endif

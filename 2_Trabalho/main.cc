@@ -39,20 +39,11 @@ int main(int argc, char const *argv[])
     if(sched_setscheduler(0, policy, &param) == -1) {
         std::cout << "Failed to set scheduler options, running on default...\n" << std::strerror(errno) << std::endl;
     }
-    // } else {
-    //     if(!isFIFO) {
-    //         std::cout << "    RR Interval: " << sched_rr_get_interval() << '\n';
-    //     }
-    //     std::cout << '\n';
-    // }
-
-    // Starts execution
-    Task::_timer = new Timer(period);
     
+    // Create task
     Task * task = new Task(period, priority, load, REPETITIONS);
     task->run();
 
-    delete Task::_timer;
     delete task;
 
     return 0;
